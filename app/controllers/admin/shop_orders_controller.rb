@@ -58,6 +58,10 @@ class Admin::ShopOrdersController < Admin::ApplicationController
       @f = fulfilled_orders.average("EXTRACT(EPOCH FROM (shop_orders.fulfilled_at - shop_orders.created_at))").to_f
     end
 
+    # Leaderboard data
+    @fulfilled_leaderboard = build_fulfilled_leaderboard
+    @approved_leaderboard = build_approved_leaderboard
+
     # Apply region filter after stats calculation (converts to array)
     if current_user.fulfillment_person? && !current_user.admin? && current_user.region.present?
       orders = orders.to_a.select do |order|
@@ -295,5 +299,60 @@ class Admin::ShopOrdersController < Admin::ApplicationController
     else
       redirect_to admin_shop_order_path(@order), alert: "Failed to update notes"
     end
+  end
+
+  private
+
+  def build_fulfilled_leaderboard
+    fulfilled_counts = ShopOrder
+      .where(aasm_state: "fulfilled")
+      .where.not(fulfilled_by: [ nil, "" ])
+      .group(:fulfilled_by)
+      .count
+
+    build_leaderboard_with_position(fulfilled_counts, current_user.id.to_s)
+  end
+
+  def build_approved_leaderboard
+    approved_counts = PaperTrail::Version
+      .where(item_type: "ShopOrder", event: "update")
+      .where("object_changes LIKE ?", "%awaiting_periodical_fulfillment%")
+      .where.not(whodunnit: [ nil, "" ])
+      .group(:whodunnit)
+      .count
+
+    build_leaderboard_with_position(approved_counts, current_user.id.to_s)
+  end
+
+  def build_leaderboard_with_position(counts, current_user_id)
+    sorted = counts.sort_by { |_, count| -count }
+    top_10 = sorted.first(10)
+
+    current_user_position = sorted.find_index { |user_id, _| user_id.to_s == current_user_id }
+    current_user_count = counts[current_user_id] || counts[current_user_id.to_i] || 0
+
+    user_ids = top_10.map { |id, _| id.to_i }
+    user_ids << current_user_id.to_i if current_user_position && current_user_position >= 10
+    users_by_id = User.where(id: user_ids).index_by { |u| u.id.to_s }
+
+    leaderboard = top_10.each_with_index.map do |(user_id, count), index|
+      user = users_by_id[user_id.to_s]
+      {
+        rank: index + 1,
+        user_id: user_id,
+        display_name: user&.display_name || "User ##{user_id}",
+        count: count,
+        is_current_user: user_id.to_s == current_user_id
+      }
+    end
+
+    {
+      top_10: leaderboard,
+      current_user: {
+        rank: current_user_position ? current_user_position + 1 : nil,
+        count: current_user_count,
+        in_top_10: current_user_position.present? && current_user_position < 10
+      }
+    }
   end
 end

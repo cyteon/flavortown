@@ -1,0 +1,83 @@
+<div style="display: flex; gap: 2em; margin-bottom: 2em; flex-wrap: wrap;">
+  <div class="card" style="flex: 1; min-width: 280px;">
+    <h2 style="font-size: 1rem; margin-bottom: 0.75rem;">🏆 Top Fulfillers</h2>
+    <% if fulfilled_leaderboard[:top_10].any? %>
+      <table style="width: 100%; border-collapse: collapse;">
+        <thead>
+          <tr style="border-bottom: 1px solid #e5e7eb;">
+            <th style="text-align: left; padding: 0.5em;">#</th>
+            <th style="text-align: left; padding: 0.5em;">Name</th>
+            <th style="text-align: right; padding: 0.5em;">Orders</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% fulfilled_leaderboard[:top_10].each do |entry| %>
+            <tr style="border-bottom: 1px solid #f3f4f6; <%= entry[:is_current_user] ? 'background-color: #fef3c7; font-weight: bold;' : '' %>">
+              <td style="padding: 0.5em;"><%= entry[:rank] %></td>
+              <td style="padding: 0.5em;"><%= entry[:display_name] %></td>
+              <td style="text-align: right; padding: 0.5em;"><%= entry[:count] %></td>
+            </tr>
+          <% end %>
+          <% unless fulfilled_leaderboard[:current_user][:in_top_10] %>
+            <% if fulfilled_leaderboard[:current_user][:rank] %>
+              <tr style="border-top: 2px dashed #d1d5db; background-color: #fef3c7; font-weight: bold;">
+                <td style="padding: 0.5em;"><%= fulfilled_leaderboard[:current_user][:rank] %></td>
+                <td style="padding: 0.5em;">You</td>
+                <td style="text-align: right; padding: 0.5em;"><%= fulfilled_leaderboard[:current_user][:count] %></td>
+              </tr>
+            <% else %>
+              <tr style="border-top: 2px dashed #d1d5db; color: #9ca3af;">
+                <td style="padding: 0.5em;">-</td>
+                <td style="padding: 0.5em;">You (no orders yet)</td>
+                <td style="text-align: right; padding: 0.5em;">0</td>
+              </tr>
+            <% end %>
+          <% end %>
+        </tbody>
+      </table>
+    <% else %>
+      <p style="color: #9ca3af; font-style: italic;">No fulfilled orders yet</p>
+    <% end %>
+  </div>
+
+  <div class="card" style="flex: 1; min-width: 280px;">
+    <h2 style="font-size: 1rem; margin-bottom: 0.75rem;">✅ Top Approvers</h2>
+    <% if approved_leaderboard[:top_10].any? %>
+      <table style="width: 100%; border-collapse: collapse;">
+        <thead>
+          <tr style="border-bottom: 1px solid #e5e7eb;">
+            <th style="text-align: left; padding: 0.5em;">#</th>
+            <th style="text-align: left; padding: 0.5em;">Name</th>
+            <th style="text-align: right; padding: 0.5em;">Orders</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% approved_leaderboard[:top_10].each do |entry| %>
+            <tr style="border-bottom: 1px solid #f3f4f6; <%= entry[:is_current_user] ? 'background-color: #fef3c7; font-weight: bold;' : '' %>">
+              <td style="padding: 0.5em;"><%= entry[:rank] %></td>
+              <td style="padding: 0.5em;"><%= entry[:display_name] %></td>
+              <td style="text-align: right; padding: 0.5em;"><%= entry[:count] %></td>
+            </tr>
+          <% end %>
+          <% unless approved_leaderboard[:current_user][:in_top_10] %>
+            <% if approved_leaderboard[:current_user][:rank] %>
+              <tr style="border-top: 2px dashed #d1d5db; background-color: #fef3c7; font-weight: bold;">
+                <td style="padding: 0.5em;"><%= approved_leaderboard[:current_user][:rank] %></td>
+                <td style="padding: 0.5em;">You</td>
+                <td style="text-align: right; padding: 0.5em;"><%= approved_leaderboard[:current_user][:count] %></td>
+              </tr>
+            <% else %>
+              <tr style="border-top: 2px dashed #d1d5db; color: #9ca3af;">
+                <td style="padding: 0.5em;">-</td>
+                <td style="padding: 0.5em;">You (no orders yet)</td>
+                <td style="text-align: right; padding: 0.5em;">0</td>
+              </tr>
+            <% end %>
+          <% end %>
+        </tbody>
+      </table>
+    <% else %>
+      <p style="color: #9ca3af; font-style: italic;">No approved orders yet</p>
+    <% end %>
+  </div>
+</div>

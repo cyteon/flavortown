@@ -17,6 +17,8 @@
 
 <%= render partial: "stats", locals: { counts: @c, average_fulfillment_time: @f } %>
 
+<%= render partial: "leaderboards", locals: { fulfilled_leaderboard: @fulfilled_leaderboard, approved_leaderboard: @approved_leaderboard } %>
+
 <div style="margin-bottom: 2em;">
   <% if params[:goob] == "true" %>
     <%= link_to "Ungroup", admin_shop_orders_path(params.permit(:user_search, :shop_item_id, :status, :date_from, :date_to, :sort, :view).except(:goob)), class: "btn-secondary slim" %>
